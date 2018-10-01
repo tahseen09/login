@@ -3,17 +3,22 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var credential = require('./model/credentials');
 
-var db=mongoose.connect("mongodb://localhost/login");
+var db=mongoose.connect("mongodb://localhost/userdb");
 
 var app= express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:false}));
 
+app.use(express.static('public'));
+
 app.post('/register', function(req,res){
-    var cred= new credential(req.body);
+    
+    var cred= new credential();
+    cred.uname=req.body.uname;
+    cred.password=req.body.password;
     cred.save(function(err,newuser){
         if(err){
-            res.status(500).send({error: "UserName Exists"});
+            res.status(500).send("Username exists");
         }
         else{
             res.status(200).send("New User Created");
@@ -22,7 +27,7 @@ app.post('/register', function(req,res){
 })
 
 app.post('/login',function(req,res){
-    console.log(req.body)
+    
     credential.findOne({
         uname: req.body.uname,
         password: req.body.password
