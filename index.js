@@ -16,7 +16,8 @@ app.post('/register', function(req,res){
     
     var cred= new credential();
     cred.uname=req.body.uname;
-    cred.password=req.body.password;
+    const hash = bcrypt.hashSync(req.body.password, 10);
+    cred.password=hash;
     cred.save(function(err,newuser){
         if(err){
             res.status(500).send("Username exists");
@@ -31,17 +32,22 @@ app.post('/login',function(req,res){
     
     credential.findOne({
         uname: req.body.uname,
-        password: req.body.password
       },
          function(err,user){
         if(err){
-            
            return res.status(500).send(err);
         }
         if (!user) { return res.status(200).send("User not found"); }
-        return res.send("You are logged in succesfully.");
-
-      return res.status(200).send("You are logged in succesfully.");
+        else{
+           const result = bcrypt.compareSync(req.body.password, user.password)
+           if(result){
+               return res.send("Logged In.")
+           }
+           if(!result){
+               return res.send("Wrong password");
+           }
+        }
+       // return res.send("You are logged in succesfully.");
 });
 });
 
