@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var credential = require('./model/credentials');
+var bcrypt = require('bcryptjs')
 
 var db=mongoose.connect("mongodb://localhost/userdb");
 
@@ -33,12 +34,12 @@ app.post('/login',function(req,res){
         password: req.body.password
       },
          function(err,user){
-             console.log(user);
         if(err){
             
            return res.status(500).send(err);
         }
         if (!user) { return res.status(200).send("User not found"); }
+        return res.send("You are logged in succesfully.");
 
       return res.status(200).send("You are logged in succesfully.");
 });
