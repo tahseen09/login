@@ -1,10 +1,26 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
-var credential = require('./model/credentials');
-var bcrypt = require('bcryptjs')
+var credential = require('./model/credentials'); //Schema import
+var bcrypt = require('bcryptjs') //for encryption of password
 
-var db=mongoose.connect("mongodb://localhost/userdb");
+mongoose.promise=global.Promise;
+
+//var db=mongoose.connect("mongodb://localhost/userdb"); //Connecting to the database
+
+const MongoClient = require('mongodb').MongoClient;
+
+// replace the uri string with your connection string.
+const uri = "mongodb+srv://tahseen09:<PASSWORD>@cluster0-pirty.mongodb.net/userdb"
+MongoClient.connect(uri, function(err, client) {
+   if(err) {
+        console.log('Error occurred while connecting to MongoDB Atlas...\n',err);
+   }
+   console.log('Connected to Atlas');
+   const collection = client.db("userdb").collection("credentials");
+   client.close();
+});
+
 
 var app= express();
 app.use(bodyParser.json());
@@ -12,13 +28,15 @@ app.use(bodyParser.urlencoded({extended:false}));
 
 app.use(express.static('public'));
 
+//New User Registration
+
 app.post('/register', function(req,res){
     
     var cred= new credential();
     cred.uname=req.body.uname;
     const hash = bcrypt.hashSync(req.body.password, 10);
     cred.password=hash;
-    cred.save(function(err,newuser){
+    collection.save(function(err,newuser){
         if(err){
             res.status(500).send("Username exists");
         }
@@ -27,6 +45,8 @@ app.post('/register', function(req,res){
         }
     })
 })
+
+//Login Authentication
 
 app.post('/login',function(req,res){
     
@@ -47,7 +67,6 @@ app.post('/login',function(req,res){
                return res.send("Wrong password");
            }
         }
-       // return res.send("You are logged in succesfully.");
 });
 });
 
