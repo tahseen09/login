@@ -3,24 +3,11 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var credential = require('./model/credentials'); //Schema import
 var bcrypt = require('bcryptjs') //for encryption of password
+var credential = require('./model/credentials.js')
 
 mongoose.promise=global.Promise;
 
-//var db=mongoose.connect("mongodb://localhost/userdb"); //Connecting to the database
-
-const MongoClient = require('mongodb').MongoClient;
-
-// replace the uri string with your connection string.
-const uri = "mongodb+srv://tahseen09:<PASSWORD>@cluster0-pirty.mongodb.net/userdb"
-MongoClient.connect(uri, function(err, client) {
-   if(err) {
-        console.log('Error occurred while connecting to MongoDB Atlas...\n',err);
-   }
-   console.log('Connected to Atlas');
-   const collection = client.db("userdb").collection("credentials");
-   client.close();
-});
-
+var db=mongoose.connect("mongodb://localhost/userdb"); //Connecting to the database
 
 var app= express();
 app.use(bodyParser.json());
@@ -36,7 +23,7 @@ app.post('/register', function(req,res){
     cred.uname=req.body.uname;
     const hash = bcrypt.hashSync(req.body.password, 10);
     cred.password=hash;
-    collection.save(function(err,newuser){
+    cred.save(function(err,newuser){
         if(err){
             res.status(500).send("Username exists");
         }
